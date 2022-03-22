@@ -48,7 +48,7 @@ class Network:
         f.close()
 
     def read_topics(self,path):
-        with open(str(path), "r") as file:
+        with open(path, "r") as file:
             reader = csv.reader(file)
             for row in reader:
                 print(row)
