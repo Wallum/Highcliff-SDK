@@ -38,7 +38,7 @@ class Network:
         raise NotImplementedError
 
     def create_topic(self, path, topic):
-        f = open(path, "a")
+        f = open(str(path+"topics.csv"), "a")
         f.write(",")
         f.write(topic)
         f.close()
