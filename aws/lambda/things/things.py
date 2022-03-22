@@ -26,7 +26,7 @@ class Thing():
             'sample_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'value': self.get_data(),
         })
-        print(f'Publising in topic {self.world_topic}: {payload}')
+        print(f'Publishing in topic {self.world_topic}: {payload}')
         self.mqtt_client.publish(
             topic=self.world_topic,
             qos=1,

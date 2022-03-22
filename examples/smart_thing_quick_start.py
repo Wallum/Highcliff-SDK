@@ -1,8 +1,10 @@
 # needed to run a local version of the AI
+from ctypes.wintypes import HICON
 from highcliff.ai import AI
 
 # the Highcliff actions to be tested
 from highcliff.exampleactions import MonitorBodyTemperature
+
 
 # get a reference to the ai and its network
 highcliff = AI.instance()
