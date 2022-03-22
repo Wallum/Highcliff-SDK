@@ -42,6 +42,10 @@ class Network:
         f.close()
         # raise NotImplementedError
 
+    def create_topic_file(self):
+        f = open("topics.csv", "x")
+        f.close()
+
     def read_topics(self):
         with open("topics.csv", "r") as file:
             reader = csv.reader(file)
