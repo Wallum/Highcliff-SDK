@@ -4,6 +4,7 @@ from highcliff.singleton import Singleton
 # needed for message queuing and validation
 from jsonschema import validate, ValidationError
 import json
+import csv
 
 # needed to reference the json schema file from within the host application
 import pkgutil
