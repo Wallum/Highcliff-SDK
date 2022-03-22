@@ -37,14 +37,16 @@ class Network:
         # adds the given update to the persistent store of the world state
         raise NotImplementedError
 
-    def create_topic(self, topic):
-        f = open("topics.csv", "a")
-        f.write(str(","+topic))
+    def create_topic(self, path, topic):
+        f = open(path, "a")
+        f.write(",")
+        f.write(topic)
         f.close()
         # raise NotImplementedError
 
-    def create_topic_file(self):
-        f = open("topics.csv", "x")
+    def create_topic_file(self, path, topic):
+        f = open(str(path+"topics.csv"), "x")
+        f.write(topic)
         f.close()
 
     def read_topics(self,path):
