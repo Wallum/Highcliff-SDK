@@ -133,7 +133,7 @@ class MqttNetwork(Network):
     def connect(self, endpoint="a15645u9kev0b1-ats.iot.eu-west-2.amazonaws.com",
                 port=8883, cert="/home/ubuntu/certs/certificate.pem.crt",
                 key="/home/ubuntu/certs/private.pem.key",
-                client_id=None, world_topic='world'):
+                client_id=None, world_topic='world', topic='#'):
         self.world_topic = world_topic
         if client_id is None:
             client_id = "HighCliff-" + str(uuid4())
@@ -156,10 +156,7 @@ class MqttNetwork(Network):
         )
         connect_future = self.__mqtt_client.connect()
         connect_future.result()
-        self.__subscribe_everything()
-
-    def __subscribe_everything(self):
-        self.__subscribe('#')
+        self.__subscribe(topic)
 
     def __subscribe(self, topic):
         subscribe_future, _ = self.__mqtt_client.subscribe(
@@ -179,7 +176,7 @@ class MqttNetwork(Network):
     def __publish(self, topic, message):
         self.__validate_connection()
         payload = json.dumps(message)
-        print(f'Publising in topic {topic}: {payload}')
+        print(f'Publishing in topic {topic}: {payload}')
         self.__mqtt_client.publish(
             topic=topic,
             payload=payload,
