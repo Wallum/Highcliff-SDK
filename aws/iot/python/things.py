@@ -27,8 +27,8 @@ class Thing():
             client_bootstrap=client_bootstrap,
             cert_filepath=cert_filepath,
             pri_key_filepath=pri_key_filepath,
-            on_connection_interrupted=self.on_connection_interrupted,
-            on_connection_resumed=self.on_connection_resumed,
+            on_connection_interrupted=self.__on_connection_interrupted,
+            on_connection_resumed=self.__on_connection_resumed,
             clean_session=False,
             keep_alive_secs=30,
         )
@@ -39,29 +39,28 @@ class Thing():
         print('Connected')
 
     # Callback when connection is accidentally lost.
-    def on_connection_interrupted(self, connection, error, **kwargs):
-        print("Connection interrupted. error: {}".format(error))
+    def __on_connection_interrupted(self, connection, error, **kwargs):
+        print(f'Connection interrupted. error: {error}')
 
 
     # Callback when an interrupted connection is re-established.
-    def on_connection_resumed(self, connection, return_code, session_present, **kwargs):
-        print("Connection resumed. return_code: {} session_present: {}".format(return_code, session_present))
-
+    def __on_connection_resumed(self, connection, return_code, session_present, **kwargs):
+        print(f'Connection resumed. return_code: {return_code} session_present: {session_present}')
         if return_code == mqtt.ConnectReturnCode.ACCEPTED and not session_present:
-            print("Session did not persist. Resubscribing to existing topics...")
+            print('Session did not persist. Resubscribing to existing topics...')
             resubscribe_future, _ = connection.resubscribe_existing_topics()
 
             # Cannot synchronously wait for resubscribe result because we're on the connection's event-loop thread,
             # evaluate result with a callback instead.
-            resubscribe_future.add_done_callback(self.on_resubscribe_complete)
+            resubscribe_future.add_done_callback(self.__on_resubscribe_complete)
 
-    def on_resubscribe_complete(self, resubscribe_future):
+    def __on_resubscribe_complete(self, resubscribe_future):
         resubscribe_results = resubscribe_future.result()
-        print("Resubscribe results: {}".format(resubscribe_results))
+        print(f'Resubscribe results: {resubscribe_results}')
 
         for topic, qos in resubscribe_results['topics']:
             if qos is None:
-                sys.exit("Server rejected resubscribe to topic: {}".format(topic))
+                sys.exit(f'Server rejected resubscribe to topic: {topic}')
 
     def run(self):
         while True:
