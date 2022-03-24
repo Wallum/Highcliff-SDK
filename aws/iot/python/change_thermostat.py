@@ -7,6 +7,8 @@ import time
 from awscrt import io, mqtt
 from awsiot import mqtt_connection_builder
 
+from things import Message
+
 class ConfigurationChanger():
     DEVICE_ID = 'configuration_changer'
 
@@ -50,12 +52,13 @@ class ConfigurationChanger():
     def receive_world_state(self, topic, payload, **kwargs):
         decoded_payload = str(payload.decode("utf-8", "ignore"))
         data = json.loads(decoded_payload)
-        print(f'Received message in topic {topic}:\n\t{data}')
-        print(data['device_id'])
-        if data['device_id'] == self.device_to_change_id:
-            if data['value'] != self.new_value:
+        message = Message(**data)
+        print(f'Received message in topic {topic}:\n\t{message}')
+        print(message.event_source)
+        if message.event_source == self.device_to_change_id:
+            if message.data != self.new_value:
                 if self.new_value is None:
-                    self.new_value = data['value'] + 4
+                    self.new_value = message.data + 4
                 print(f'New value for the device: {self.new_value}')
                 self.send_new_value()
             else:
@@ -65,28 +68,35 @@ class ConfigurationChanger():
             print('Not interested in this device')
 
     def send_new_value(self):
-        payload = json.dumps({
-            'device_id': self.DEVICE_ID,
-            'type': 'smart',
-            'sample_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'value': self.new_value,
-        })
+        message = Message(
+            event_type='allowance',
+            event_tags={'requested_device': self.device_to_change_id},
+            event_source=self.DEVICE_ID,
+            timestamp=time.time(),
+            device_info=None,
+            application_info=None,
+            user_info=None,
+            environment=None,
+            context=None,
+            effects=None,
+            data=self.new_value,
+        )
         topic = f'{self.device_to_change_id}_request'
-        print(f'Publising in topic {topic}: {payload}')
+        print(f'Publising in topic {topic}: {message}')
         self.mqtt_client.publish(
             topic=topic,
-            payload=payload,
+            payload=json.dumps(message._asdict()),
             qos=mqtt.QoS.AT_LEAST_ONCE,
         )
 
     def receive_response(self, topic, payload, **kwargs):
         decoded_payload = str(payload.decode("utf-8", "ignore"))
-        data = json.loads(decoded_payload)
-        print(f'Received message in topic {topic}:\n\t{data}')
-        if data['requester_device_id'] != self.DEVICE_ID:
+        message = Message(**json.loads(decoded_payload))
+        print(f'Received message in topic {topic}:\n\t{message}')
+        if message.event_tags['requester_device'] != self.DEVICE_ID:
             print('Message not for me')
         else:
-            print(f'Temperature change allowed: {data["allowed"]}')
+            print(f'Temperature change allowed: {message.data}')
 
 
 def main(thermostat_device_id, topic, endpoint, cert_filepath, pri_key_filepath):

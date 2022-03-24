@@ -7,6 +7,7 @@ from things import Thermometer
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Generate random temperatures and publish them.")
     parser.add_argument('--device-id', default='thermometer-livingroom', type=str, help='Device id')
+    parser.add_argument('--location', default='livingroom', type=str, help='Device location')
     parser.add_argument('--topic', default='world', type=str, help='MQtt topic.')
     parser.add_argument('--publish-delay', default=30, type=int, help='Time between each published message')
     parser.add_argument(
@@ -30,6 +31,7 @@ if __name__ == '__main__':
     args = parse_arguments()
     thermometer = Thermometer(
         args.device_id,
+        args.location,
         args.topic,
         args.publish_delay,
     )

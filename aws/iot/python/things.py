@@ -1,4 +1,4 @@
-from datetime import datetime
+from collections import namedtuple
 import json
 import random
 import time
@@ -6,10 +6,12 @@ import time
 from awscrt import io, mqtt
 from awsiot import mqtt_connection_builder
 
+Message = namedtuple('Message', 'event_type event_tags event_source timestamp device_info application_info user_info environment context effects data')
 
 class Thing():
-    def __init__(self, device_id, world_topic='world', publish_delay=30):
+    def __init__(self, device_id, location=None, world_topic='world', publish_delay=30):
         self.device_id = device_id
+        self.location = location
         self.publish_delay = publish_delay
         self.world_topic = world_topic
         self.mqtt_client = None
@@ -67,16 +69,52 @@ class Thing():
             time.sleep(self.publish_delay)
 
     def publish_data(self):
-        data = {
-            'device_id': self.device_id,
-            'type': self.get_info_type(),
-            'sample_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'value': self.get_data(),
-        }
+        data = Message(
+            event_type=self.get_event_type(),
+            event_tags=self.get_event_tags(),
+            event_source=self.device_id,
+            timestamp=time.time(),
+            device_info=self.get_device_info(),
+            application_info=self.get_application_info(),
+            user_info=self.get_user_info(),
+            environment=self.get_environment(),
+            context=self.get_context(),
+            effects=self.get_effects(),
+            data=self.get_data(),
+        )
         self.publish(self.world_topic, data)
 
+    def get_event_type(self):
+        raise NotImplementedError
+
+    def get_event_tags(self):
+        if self.location is not None:
+            return {'location': self.location}
+        return None
+
+    def get_device_info(self):
+        return None
+
+    def get_application_info(self):
+        return None
+
+    def get_user_info(self):
+        return None
+
+    def get_environment(self):
+        return None
+
+    def get_context(self):
+        return None
+
+    def get_effects(self):
+        return None
+
+    def get_data(self):
+        raise NotImplementedError
+
     def publish(self, topic, data):
-        payload = json.dumps(data)
+        payload = json.dumps(data._asdict())
         print(f'Publising in topic {self.world_topic}: {payload}')
         self.mqtt_client.publish(
             topic=topic,
@@ -84,11 +122,6 @@ class Thing():
             qos=mqtt.QoS.AT_LEAST_ONCE,
         )
 
-    def get_data(self):
-        raise NotImplementedError
-
-    def get_info_type(self):
-        raise NotImplementedError
 
 
 class InteractiveThing(Thing):
@@ -106,14 +139,14 @@ class InteractiveThing(Thing):
         )
 
     def receive_request(self, topic, payload, **kwargs):
-        data = self.preocess_payload(payload)
-        print(f'Received request in topic {topic}:\n\t{data}')
-        if self.allowed(data['device_id']):
-            self.process_request(topic, data)
-            self.publish_accepted(data)
+        message = self.process_payload(payload)
+        print(f'Received request in topic {topic}:\n\t{message}')
+        if self.allowed(message.event_source):
+            self.process_request(topic, message)
+            self.publish_accepted(message)
             self.publish_data()
         else:
-            self.pusblish_rejected(data)
+            self.pusblish_rejected(message)
 
     def allowed(self, device_id):
         return True
@@ -124,28 +157,38 @@ class InteractiveThing(Thing):
     def get_response_topic(self):
         return f'{self.device_id}_response'
 
-    def publish_accepted(self, data):
-        self.publish_allowance(data['device_id'], True)
+    def publish_accepted(self, message):
+        self.publish_allowance(message.event_source, True)
 
-    def publish_rejected(self, data):
-        self.publish_allowance(data['device_id'], False)
+    def publish_rejected(self, message):
+        self.publish_allowance(message.event_source, False)
 
     def publish_allowance(self, request_device_id, allowed):
-        data = {
-            'device_id': self.device_id,
-            'requester_device_id': request_device_id,
-            'type': self.get_info_type(),
-            'allowed': allowed,
-        }
+        tags = self.get_event_tags()
+        tags['requester_device'] = request_device_id
+
+        data = Message(
+            event_type='allowance',
+            event_tags=tags,
+            event_source=self.device_id,
+            timestamp=time.time(),
+            device_info=self.get_device_info(),
+            application_info=self.get_application_info(),
+            user_info=self.get_user_info(),
+            environment=self.get_environment(),
+            context=self.get_context(),
+            effects=self.get_effects(),
+            data=allowed,
+        )
         self.publish(self.get_response_topic(), data)
 
     def process_request(self, topic, payload):
         raise NotImplementedError
 
     @classmethod
-    def preocess_payload(cls, payload):
+    def process_payload(cls, payload):
         decoded_payload = str(payload.decode("utf-8", "ignore"))
-        return json.loads(decoded_payload)
+        return Message(**json.loads(decoded_payload))
 
 
 class Thermometer(Thing):
@@ -154,21 +197,21 @@ class Thermometer(Thing):
         return round(random.uniform(35.5, 42.5), 1)
 
     @classmethod
-    def get_info_type(cls):
+    def get_event_type(cls):
         return 'temperature'
 
 
 class Thermostat(InteractiveThing):
-    def __init__(self, device_id, world_topic, publish_delay, init_temperature=20):
-        super().__init__(device_id, world_topic, publish_delay)
+    def __init__(self, device_id, location, world_topic, publish_delay, init_temperature=20):
+        super().__init__(device_id, location, world_topic, publish_delay)
         self.temperature = init_temperature
 
     def get_data(self):
         return self.temperature
 
     @classmethod
-    def get_info_type(cls):
+    def get_event_type(cls):
         return 'configured_temperature'
 
-    def process_request(self, topic, data):
-        self.temperature = int(data['value'])
+    def process_request(self, topic, message):
+        self.temperature = int(message.data)

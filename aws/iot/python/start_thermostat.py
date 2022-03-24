@@ -8,6 +8,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Generate random temperatures and publish them.")
     parser.add_argument('--device-id', default='thermostat-livingroom', type=str, help='Device id')
     parser.add_argument('--topic', default='world', type=str, help='MQtt topic.')
+    parser.add_argument('--location', default='livingroom', type=str, help='Device location')
     parser.add_argument('--publish-delay', default=30, type=int, help='Time between each published message')
     parser.add_argument(
         '--endpoint',
@@ -30,6 +31,7 @@ if __name__ == '__main__':
     args = parse_arguments()
     thermostat = Thermostat(
         args.device_id,
+        args.location,
         args.topic,
         args.publish_delay,
         20,
