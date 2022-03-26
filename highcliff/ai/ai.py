@@ -124,27 +124,11 @@ class AI:
         }
         self._diary.append(diary_entry)
 
-    def _run_ai(self):
-        # todo: go through this and get rid of unnecessary updates
-        # select a single goal from the list of goals
-        goal = self._select_goal(self._goals)
-
-        # log that a goal has been selected
-        if self._debug_logging:
-            log_event_to_the_terminal_window("The AI has selected a goal: " + str(goal))
-
+    def _plan(self, goal):
         # create a planner capable of achieving the selected goal
         planner = RegressivePlanner(self._get_world_state(), self.capabilities())
-
-        # start by assuming that there is no plan, the action will have no effect and will fail
         plan = None
-        action_status = ActionStatus.FAIL
-        actual_effect = {}
 
-        # take a snapshot of the current world state before taking action that may change it
-        world_state_snapshot = copy.copy(self._get_world_state())
-
-        # todo: refactor this into methods so that they are easier to read
         try:
             # make a plan
             plan = planner.find_plan(goal)
@@ -152,26 +136,6 @@ class AI:
             # log that a plan has been created
             if self._debug_logging:
                 log_event_to_the_terminal_window("The AI has made a plan to execute the goal")
-
-            try:
-                next_action = plan[0].action
-
-                # execute the first act in the plan. it will affect the world and get us one step closer to the goal
-                # the plan will be updated and actions executed until the goal is reached
-                intended_effect = copy.copy(next_action.effects)
-                next_action.act()
-
-                # TODO: catch the error if the action is no longer available
-
-            except IndexError:
-                # if there is no viable plan, then record no intended effect
-                intended_effect = {}
-
-            # the action is a success if the altered world matches the action's intended effect
-            actual_effect = copy.copy(self._get_world_state())
-            action_had_intended_effect = intent_is_real(intended_effect, actual_effect)
-            if action_had_intended_effect:
-                action_status = ActionStatus.SUCCESS
 
         except PathNotFoundException:
             # no viable plan found. no action to be taken
@@ -187,8 +151,58 @@ class AI:
             if self._debug_logging:
                 log_event_to_the_terminal_window("The AI has no registered actions capable of satisfying the goal")
 
+        return plan
+
+    @staticmethod
+    def _act(plan):
+        try:
+            next_action = plan[0].action
+
+            # execute the first act in the plan. it will affect the world and get us one step closer to the goal
+            # the plan will be updated and actions executed until the goal is reached
+            intended_effect = copy.copy(next_action.effects)
+            next_action.act()
+
+            # TODO: catch the error if the action is no longer available
+
+        except IndexError:
+            # if the given plan has no actions, then record no intended effect
+            intended_effect = {}
+
+        except TypeError:
+            # if there is no viable plan, then record no intended effect
+            intended_effect = {}
+
+        return intended_effect
+
+    def _run_ai(self):
+        # select a single goal from the list of goals
+        goal = self._select_goal(self._goals)
+
+        # log that a goal has been selected
+        if self._debug_logging:
+            log_event_to_the_terminal_window("The AI has selected a goal: " + str(goal))
+
+        # start by assuming that there is no plan, the action will have no effect and will fail
+        action_status = ActionStatus.FAIL
+
+        # take a snapshot of the current world state before taking action that may change it
+        world_state_snapshot = copy.copy(self._get_world_state())
+
+        # make a plan
+        plan = self._plan(goal)
+
+        # execute the first act in the plan. it will affect the world and get us one step closer to the goal
+        # the plan will be updated and actions executed until the goal is reached
+        intended_effect = self._act(plan)
+
+        # the action is a success if the altered world matches the action's intended effect
+        actual_effect = copy.copy(self._get_world_state())
+        action_had_intended_effect = intent_is_real(intended_effect, actual_effect)
+        if action_had_intended_effect:
+            action_status = ActionStatus.SUCCESS
+
         # record the results of this iteration
-        # todo: replace the 'after' world state with a copy
         self._reflect(copy.copy(goal), world_state_snapshot, copy.copy(plan), copy.copy(action_status), copy.copy(self._get_world_state()))
 
     def diary(self):
