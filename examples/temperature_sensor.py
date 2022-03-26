@@ -7,11 +7,11 @@ class TemperatureScale(Enum):
     FAHRENHEIT = 2
 
 
-# simulates a sensor that returns a reading of the room temperature
+# simulates a sensor that returns a reading of the body temperature
 def get_body_temperature(scale):
     if scale == TemperatureScale.CELSIUS:
-        room_temperature = random.randint(32, 10)
+        body_temperature = random.randint(33, 40)
     else:
-        room_temperature = random.randint(90, 50)
+        body_temperature = random.randint(95, 105)
 
-    return room_temperature
+    return body_temperature
