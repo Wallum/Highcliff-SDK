@@ -12,6 +12,12 @@ from highcliff.exampleactions import MonitorBodyTemperature
 import rpyc
 
 
+'''
+The body temperature monitor application depends on a connection with the a remote ai server.
+This code assumes that the ai server is up and running already.
+'''
+
+
 class BodyTemperatureMonitor(MonitorBodyTemperature):
     def behavior(self):
         print("monitoring body temperature")

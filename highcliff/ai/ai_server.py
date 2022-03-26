@@ -14,12 +14,9 @@ from rpyc.utils.server import ThreadedServer
 # needed to reference the json ai goal file
 import json
 
-# needed to start ai server execution in its own thread
-from threading import Thread
-
 
 class AIServer(rpyc.Service):
-    def __init__(self):
+    def __init__(self, ai_goals_file):
         self._ai_instance = AI.instance()
 
         # get a reference to the centralized infrastructure
@@ -29,13 +26,13 @@ class AIServer(rpyc.Service):
         network.update_the_world({})
 
         # determine the goals for the AI using the goals file
-        with open('ai_goals.json') as json_file:
+        with open(ai_goals_file) as json_file:
             ai_goals = json.load(json_file)
         self._ai_instance.set_goals(ai_goals)
 
-        # set the AI to run indefinitely (-1) and asynchronously in its own thread
-        ai_execution_thread = Thread(target=self._ai_instance.run, kwargs={'life_span_in_iterations': -1})
-        ai_execution_thread.start()
+        # set the AI to run indefinitely
+        run_indefinitely = -1
+        self._ai_instance.run(life_span_in_iterations=-run_indefinitely)
 
     def on_connect(self, conn):
         pass
@@ -47,11 +44,11 @@ class AIServer(rpyc.Service):
         return self._ai_instance
 
 
-def start_ai_server():
+def start_ai_server(ai_goals_file):
     # TODO: change the port to an environment variable
-    thread = ThreadedServer(AIServer, port=18861)
+    thread = ThreadedServer(AIServer(ai_goals_file), port=18861)
     thread.start()
 
 
 if __name__ == "__main__":
-    start_ai_server()
+    start_ai_server("ai_goals.json")

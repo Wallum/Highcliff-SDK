@@ -17,6 +17,9 @@ from highcliff.infrastructure import LocalNetwork
 # used to make AI a singleton
 from highcliff.singleton import Singleton
 
+# needed to start ai server execution in its own thread
+from threading import Thread
+
 
 def intent_is_real(intent, reality):
     is_real = True
@@ -34,69 +37,73 @@ def intent_is_real(intent, reality):
 
 @Singleton
 class AI:
-    __network = LocalNetwork.instance()
-    __goals = None
-    __capabilities = []
-    __diary = []
+    _network = LocalNetwork.instance()
+    _goals = None
+    _capabilities = []
+    _diary = []
 
     def network(self):
-        return self.__network
+        return self._network
 
     def set_goals(self, goals):
-        self.__goals = goals
+        self._goals = goals
 
     def capabilities(self):
-        return self.__capabilities
+        return self._capabilities
 
     def add_capability(self, action):
-        self.__capabilities.append(action)
+        self._capabilities.append(action)
 
     def run(self, life_span_in_iterations):
         # if the life span is specified as some positive number, stay alive for that number of iterations
         if life_span_in_iterations > 0:
             for iteration in range(life_span_in_iterations):
-                self.__run_ai()
+                # run the ai in it's own thread of execution
+                ai_execution_thread = Thread(target=self._run_ai)
+                ai_execution_thread.start()
         # if the life span is specified as -1, run forever
         else:
             while True:
-                self.__run_ai()
+                # run the ai asynchronously in it's own thread of execution
+                ai_execution_thread = Thread(target=self._run_ai)
+                ai_execution_thread.start()
 
     def reset(self):
-        self.__network.reset()
-        self.__goals = None
-        self.__diary = []
-        self.__capabilities = []
+        self._network.reset()
+        self._goals = None
+        self._diary = []
+        self._capabilities = []
 
-    def __get_world_state(self):
+    def _get_world_state(self):
         # this function returns the current state of the world
-        return self.__network.the_world()
+        return self._network.the_world()
 
-    def __select_goal(self, prioritized_goals):
+    def _select_goal(self, prioritized_goals):
         # work on the next highest-priority goal that has not yet been met
 
         # the default is to select an empty goal
         selected_goal = {}
 
         # go through goals in priority order
-        for goal in self.__goals:
+        for goal in self._goals:
             # if the condition is not in the world, add it to the world, assume it's false, pursue the goal
-            if goal not in self.__get_world_state():
-                self.__network.update_the_world({goal: False})
-                selected_goal = {goal: self.__goals[goal]}
+            if goal not in self._get_world_state():
+                self._network.update_the_world({goal: False})
+                selected_goal = {goal: self._goals[goal]}
                 break
 
             # if the goal is already met (matches the condition of the world) then skip it
-            if self.__goals[goal] == self.__get_world_state()[goal]:
+            if self._goals[goal] == self._get_world_state()[goal]:
                 pass
 
             # if the goal is not met (mismatches the condition of the world) pursue it
-            if self.__goals[goal] != self.__get_world_state()[goal]:
-                selected_goal = {goal: self.__goals[goal]}
+            if self._goals[goal] != self._get_world_state()[goal]:
+                selected_goal = {goal: self._goals[goal]}
                 break
 
         return selected_goal
 
-    def __reflect(self, goal, world_state_before, plan, action_status, world_state_after):
+    def _reflect(self, goal, world_state_before, plan, action_status, world_state_after):
         diary_entry = {
             "my_goal": goal,
             "the_world_state_before": world_state_before,
@@ -104,15 +111,15 @@ class AI:
             "action_status": action_status,
             "the_world_state_after": world_state_after
         }
-        self.__diary.append(diary_entry)
+        self._diary.append(diary_entry)
 
-    def __run_ai(self):
+    def _run_ai(self):
         # todo: go through this and get rid of unnecessary updates
         # select a single goal from the list of goals
-        goal = self.__select_goal(self.__goals)
+        goal = self._select_goal(self._goals)
 
         # create a plan to achieve the selected goal
-        planner = RegressivePlanner(self.__get_world_state(), self.capabilities())
+        planner = RegressivePlanner(self._get_world_state(), self.capabilities())
 
         # start by assuming that there is no plan, the action will have no effect and will fail
         plan = None
@@ -120,7 +127,7 @@ class AI:
         actual_effect = {}
 
         # take a snapshot of the current world state before taking action that may change it
-        world_state_snapshot = copy.copy(self.__get_world_state())
+        world_state_snapshot = copy.copy(self._get_world_state())
 
         try:
             # make a plan
@@ -139,7 +146,7 @@ class AI:
                 intended_effect = {}
 
             # the action is a success if the altered world matches the action's intended effect
-            actual_effect = copy.copy(self.__get_world_state())
+            actual_effect = copy.copy(self._get_world_state())
             action_had_intended_effect = intent_is_real(intended_effect, actual_effect)
             if action_had_intended_effect:
                 action_status = ActionStatus.SUCCESS
@@ -154,7 +161,7 @@ class AI:
 
         # record the results of this iteration
         # todo: replace the 'after' world state with a copy
-        self.__reflect(copy.copy(goal), world_state_snapshot, copy.copy(plan), copy.copy(action_status), copy.copy(self.__get_world_state()))
+        self._reflect(copy.copy(goal), world_state_snapshot, copy.copy(plan), copy.copy(action_status), copy.copy(self._get_world_state()))
 
     def diary(self):
-        return self.__diary
+        return self._diary
