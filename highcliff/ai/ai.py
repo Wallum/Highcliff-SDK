@@ -20,6 +20,9 @@ from highcliff.singleton import Singleton
 # needed to start ai server execution in its own thread
 from threading import Thread
 
+# needed to log debug messages to the terminal window
+from highcliff.logging import log_event_to_the_terminal_window
+
 
 def intent_is_real(intent, reality):
     is_real = True
@@ -41,6 +44,10 @@ class AI:
     _goals = None
     _capabilities = []
     _diary = []
+    _debug_logging = False
+
+    def set_debug_logging(self, debug_logging):
+        self._debug_logging = debug_logging
 
     def network(self):
         return self._network
@@ -57,6 +64,10 @@ class AI:
     def run(self, life_span_in_iterations):
         # if the life span is specified as some positive number, stay alive for that number of iterations
         if life_span_in_iterations > 0:
+            # log that the ai is running
+            if self._debug_logging:
+                log_event_to_the_terminal_window("Running the AI for " + str(life_span_in_iterations) + " iterations")
+            # run the ai
             for iteration in range(life_span_in_iterations):
                 # run the ai in it's own thread of execution
                 ai_execution_thread = Thread(target=self._run_ai)
@@ -64,6 +75,10 @@ class AI:
         # if the life span is specified as -1, run forever
         else:
             while True:
+                # log that the ai is running
+                if self._debug_logging:
+                    log_event_to_the_terminal_window("Running the AI indefinitely")
+
                 # run the ai asynchronously in it's own thread of execution
                 ai_execution_thread = Thread(target=self._run_ai)
                 ai_execution_thread.start()

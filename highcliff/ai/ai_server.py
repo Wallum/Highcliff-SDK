@@ -3,6 +3,8 @@ __copyright__ = "Copyright (C) 2020 appliedAIstudio"
 __version__ = "0.1"
 
 # needed to run the ai
+import os
+
 from highcliff.ai import AI
 
 # needed to run the ai as a remote service
@@ -16,8 +18,10 @@ import json
 
 
 class AIServer(rpyc.Service):
-    def __init__(self, ai_goals_file):
+    def __init__(self, ai_goals_file, debug_logging):
         self._ai_instance = AI.instance()
+
+        self._ai_instance.set_debug_logging(debug_logging)
 
         # get a reference to the centralized infrastructure
         network = self._ai_instance.network()
@@ -45,8 +49,10 @@ class AIServer(rpyc.Service):
 
 
 def start_ai_server(ai_goals_file):
-    # TODO: change the port to an environment variable
-    thread = ThreadedServer(AIServer(ai_goals_file), port=18861)
+    port = os.environ["port"]
+    debug_logging = os.environ["debug_logging"] == "True"
+
+    thread = ThreadedServer(AIServer(ai_goals_file, debug_logging=debug_logging), port=18861)
     thread.start()
 
 
