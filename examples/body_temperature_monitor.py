@@ -30,6 +30,7 @@ class BodyTemperatureMonitor(MonitorTemperature):
         # an adjustment is needed only if the current body temperature is outside a normal range
         normal_body_temperature_in_fahrenheit = range(97, 99)
         if current_body_temperature not in normal_body_temperature_in_fahrenheit:
+            # todo: we should see these executing. instrument the ai to see actions executing
             print("the body temperature is not normal")
             self._adjustment_needed()
         else:

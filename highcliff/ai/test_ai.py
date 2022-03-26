@@ -162,8 +162,6 @@ class TestAI(unittest.TestCase):
         ai = connection.root.get_ai_instance()
         from highcliff.actions import AIaction
 
-        ai.add_capability(foo)
-
         # verify that we are connected to an object of the expected type
         expected_type_for_ai_object = "<netref class 'rpyc.core.netref.Singleton'>"
         self.assertEqual(expected_type_for_ai_object, str(type(ai)))

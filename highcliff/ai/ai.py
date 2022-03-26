@@ -58,6 +58,8 @@ class AI:
     def add_capability(self, action):
         self._capabilities.append(action)
 
+    # TODO: add code to remove a capability
+
     def run(self, life_span_in_iterations):
         # if the life span is specified as some positive number, stay alive for that number of iterations
         if life_span_in_iterations > 0:
@@ -142,6 +144,7 @@ class AI:
         # take a snapshot of the current world state before taking action that may change it
         world_state_snapshot = copy.copy(self._get_world_state())
 
+        # todo: refactor this into methods so that they are easier to read
         try:
             # make a plan
             plan = planner.find_plan(goal)
@@ -157,6 +160,8 @@ class AI:
                 # the plan will be updated and actions executed until the goal is reached
                 intended_effect = copy.copy(next_action.effects)
                 next_action.act()
+
+                # TODO: catch the error if the action is no longer available
 
             except IndexError:
                 # if there is no viable plan, then record no intended effect
