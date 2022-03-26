@@ -1,14 +1,14 @@
-import enum
+from enum import Enum
 import random
 
 
-class TemperatureScale(enum):
+class TemperatureScale(Enum):
     CELSIUS = 1
     FAHRENHEIT = 2
 
 
 # simulates a sensor that returns a reading of the room temperature
-def get_room_temperature(scale):
+def get_body_temperature(scale):
     if scale == TemperatureScale.CELSIUS:
         room_temperature = random.randint(32, 10)
     else:
