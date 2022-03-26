@@ -17,9 +17,6 @@ from highcliff.infrastructure import LocalNetwork
 # used to make AI a singleton
 from highcliff.singleton import Singleton
 
-# needed to start ai server execution in its own thread
-from threading import Thread
-
 # needed to log debug messages to the terminal window
 from highcliff.logging import log_event_to_the_terminal_window
 
@@ -69,19 +66,16 @@ class AI:
                 log_event_to_the_terminal_window("Running the AI for " + str(life_span_in_iterations) + " iterations")
             # run the ai
             for iteration in range(life_span_in_iterations):
-                # run the ai in it's own thread of execution
-                ai_execution_thread = Thread(target=self._run_ai)
-                ai_execution_thread.start()
+                self._run_ai()
+
         # if the life span is specified as -1, run forever
         else:
+            # log that the ai is running
+            if self._debug_logging:
+                log_event_to_the_terminal_window("Running the AI indefinitely")
+            # run the ai
             while True:
-                # log that the ai is running
-                if self._debug_logging:
-                    log_event_to_the_terminal_window("Running the AI indefinitely")
-
-                # run the ai asynchronously in it's own thread of execution
-                ai_execution_thread = Thread(target=self._run_ai)
-                ai_execution_thread.start()
+                self._run_ai()
 
     def reset(self):
         self._network.reset()
@@ -133,7 +127,11 @@ class AI:
         # select a single goal from the list of goals
         goal = self._select_goal(self._goals)
 
-        # create a plan to achieve the selected goal
+        # log that a goal has been selected
+        if self._debug_logging:
+            log_event_to_the_terminal_window("The AI has selected a goal: " + str(goal))
+
+        # create a planner capable of achieving the selected goal
         planner = RegressivePlanner(self._get_world_state(), self.capabilities())
 
         # start by assuming that there is no plan, the action will have no effect and will fail
@@ -147,6 +145,10 @@ class AI:
         try:
             # make a plan
             plan = planner.find_plan(goal)
+
+            # log that a plan has been created
+            if self._debug_logging:
+                log_event_to_the_terminal_window("The AI has made a plan to execute the goal")
 
             try:
                 next_action = plan[0].action
@@ -168,11 +170,17 @@ class AI:
 
         except PathNotFoundException:
             # no viable plan found. no action to be taken
-            pass
+
+            # log that no viable plan was found
+            if self._debug_logging:
+                log_event_to_the_terminal_window("The AI has found no viable plan to achieve the selected goal")
 
         except KeyError:
             # there are no registered actions that can satisfy the specified goal. no action to be taken
-            pass
+
+            # log that no necessary registered actions were found
+            if self._debug_logging:
+                log_event_to_the_terminal_window("The AI has no registered actions capable of satisfying the goal")
 
         # record the results of this iteration
         # todo: replace the 'after' world state with a copy
