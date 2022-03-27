@@ -134,7 +134,7 @@ class TestHighcliffExamples(unittest.TestCase):
         class TestFailedAction(MonitorBodyTemperature):
 
             def action_failure(self):
-                self.effects['is_body_temperature_monitored'] = False
+                self.actual_effects['is_room_temperature_change_needed'] = False
 
             def behavior(self):
                 self.action_failure()
@@ -142,8 +142,8 @@ class TestHighcliffExamples(unittest.TestCase):
         TestFailedAction(self.highcliff)
 
         # define the test world state and goals
-        self.network.update_the_world({"is_body_temperature_monitored": False})
-        self.highcliff.set_goals({"is_body_temperature_monitored": True})
+        self.network.update_the_world({})
+        self.highcliff.set_goals({"is_room_temperature_change_needed": True})
 
         # run a local version of Highcliff
         self.highcliff.run(life_span_in_iterations=1)
