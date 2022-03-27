@@ -29,12 +29,11 @@ class BodyTemperatureMonitor(MonitorTemperature):
 
         # an adjustment is needed only if the current body temperature is outside a normal range
         normal_body_temperature_in_fahrenheit = range(97, 99)
-        if current_body_temperature not in normal_body_temperature_in_fahrenheit:
-            # todo: we should see these executing. instrument the ai to see actions executing
-            print("the body temperature is not normal")
-            self._adjustment_needed()
-        else:
+        if current_body_temperature in normal_body_temperature_in_fahrenheit:
             print("the body temperature is fine")
+            self._no_adjustment_needed()
+        else:
+            print("the body temperature is not normal")
             # pause before checking the body temperature again
             seconds_to_pause_before_next_checking_body_temperature = 5
             time.sleep(seconds_to_pause_before_next_checking_body_temperature)
@@ -42,7 +41,14 @@ class BodyTemperatureMonitor(MonitorTemperature):
 
 def run_body_temperature_monitor():
     # create a connection. we assume that the ai server has been started at the specified ip address and port
-    connection = rpyc.connect("localhost", 18861)
+    # todo: put host and port into environment variables
+    connection = rpyc.connect("localhost", 18861,
+                              config={"allow_all_attrs": True,
+                                      "allow_setattr": True,
+                                      "instantiate_custom_exceptions": True,
+                                      "import_custom_exceptions": True
+                                      }
+                              )
     highcliff_ai = connection.root.get_ai_instance()
     print("connected to the remote AI server")
 
@@ -50,7 +56,7 @@ def run_body_temperature_monitor():
     BodyTemperatureMonitor(highcliff_ai)
     print("registered with the remote AI server")
 
-    # keep the body temperature active for a period of time
+    # keep the body temperature active in the background for a period of time
     print("monitoring body temperature")
     seconds_to_spend_monitoring_body_temperature = 10
     monitor_execution_thread = Thread(target=time.sleep, args=(seconds_to_spend_monitoring_body_temperature,))

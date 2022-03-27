@@ -1,7 +1,5 @@
 from highcliff.actions import AIaction
 
-# TODO: remove this module
-
 
 class MonitorBodyTemperature(AIaction):
     def __init__(self, ai):

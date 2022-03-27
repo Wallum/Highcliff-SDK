@@ -46,7 +46,7 @@ class AIServer(rpyc.Service):
         if self._debug_logging:
             log_event_to_the_terminal_window("The world state for the AI server has been reset")
 
-        # determine the goals for the AI using the goals file
+        # determine the AI's goals using an external goals file
         with open("ai_goals.json") as json_file:
             ai_goals = json.load(json_file)
         self._ai_instance.set_goals(ai_goals)
@@ -55,12 +55,10 @@ class AIServer(rpyc.Service):
         if self._debug_logging:
             log_event_to_the_terminal_window("The goals for the AI server have been set")
 
-        # set the AI to run indefinitely
+        # set the AI to run indefinitely and asynchronously in it's own thread of execution
         run_indefinitely = -1
         ai_execution_thread = Thread(target=self._ai_instance.run, kwargs={"life_span_in_iterations": run_indefinitely})
         ai_execution_thread.start()
-
-        self._ai_initialized = True
 
         # log a debug event
         if self._debug_logging:
@@ -69,6 +67,9 @@ class AIServer(rpyc.Service):
     def on_connect(self, conn):
         if not self._ai_initialized:
             self._init_ai()
+
+        # initialization should not be repeated the next time a client connects
+        self._ai_initialized = True
 
     def on_disconnect(self, conn):
         pass
@@ -79,8 +80,11 @@ class AIServer(rpyc.Service):
 
 def start_ai_server():
     port = int(os.environ["port"])
-
-    thread = ThreadedServer(AIServer(), port=port, protocol_config={"allow_public_attrs": True})
+    thread = ThreadedServer(AIServer(), port=port, protocol_config={"allow_all_attrs": True,
+                                                                    "allow_setattr": True,
+                                                                    "instantiate_custom_exceptions": True,
+                                                                    "import_custom_exceptions": True
+                                                                    })
     thread.start()
 
 

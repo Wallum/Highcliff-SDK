@@ -4,6 +4,7 @@ __version__ = "0.1"
 
 # copying the state of the world for reflection
 import copy
+import time
 
 from highcliff.actions.actions import ActionStatus
 
@@ -42,6 +43,7 @@ class AI:
     _capabilities = []
     _diary = []
     _debug_logging = False
+    _foo = []
 
     def set_debug_logging(self, debug_logging):
         self._debug_logging = debug_logging
@@ -56,11 +58,14 @@ class AI:
         return self._capabilities
 
     def add_capability(self, action):
+        action.act()
         self._capabilities.append(action)
 
     # TODO: add code to remove a capability
 
     def run(self, life_span_in_iterations):
+        seconds_to_pause_between_ai_runs = 2
+
         # if the life span is specified as some positive number, stay alive for that number of iterations
         if life_span_in_iterations > 0:
             # log that the ai is running
@@ -69,6 +74,8 @@ class AI:
             # run the ai
             for iteration in range(life_span_in_iterations):
                 self._run_ai()
+                # pause to allow for processing in other areas of the ai
+                time.sleep(seconds_to_pause_between_ai_runs)
 
         # if the life span is specified as -1, run forever
         else:
@@ -78,6 +85,8 @@ class AI:
             # run the ai
             while True:
                 self._run_ai()
+                # pause to allow for processing in other areas of the ai
+                time.sleep(seconds_to_pause_between_ai_runs)
 
     def reset(self):
         self._network.reset()
@@ -97,9 +106,10 @@ class AI:
 
         # go through goals in priority order
         for goal in self._goals:
-            # if the condition is not in the world, add it to the world, assume it's false, pursue the goal
+            # if the condition is not in the world, add it to the world, assume the goal is not met, pursue the goal
             if goal not in self._get_world_state():
-                self._network.update_the_world({goal: False})
+                goal_not_met = not self._goals[goal]
+                self._network.update_the_world({goal: goal_not_met})
                 selected_goal = {goal: self._goals[goal]}
                 break
 
@@ -153,8 +163,7 @@ class AI:
 
         return plan
 
-    @staticmethod
-    def _act(plan):
+    def _act(self, plan):
         try:
             next_action = plan[0].action
 
@@ -163,15 +172,27 @@ class AI:
             intended_effect = copy.copy(next_action.effects)
             next_action.act()
 
+            # log that the ai has taken an action
+            if self._debug_logging:
+                log_event_to_the_terminal_window("The AI has taken an action")
+
             # TODO: catch the error if the action is no longer available
 
         except IndexError:
             # if the given plan has no actions, then record no intended effect
             intended_effect = {}
 
+            # log that the ai's plan has no actions
+            if self._debug_logging:
+                log_event_to_the_terminal_window("The AI's plan has no actions to execute")
+
         except TypeError:
             # if there is no viable plan, then record no intended effect
             intended_effect = {}
+
+            # log that the ai could not find a viable plan
+            if self._debug_logging:
+                log_event_to_the_terminal_window("The AI could not find a viable plan")
 
         return intended_effect
 
