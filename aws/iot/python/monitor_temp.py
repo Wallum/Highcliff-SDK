@@ -110,7 +110,44 @@ def _checkTemp(file_name: str, historic_temp: float):
             else:
                 return False, historic_temp, sample_time
     
+def flex(path):
+    file_exists = os.path.exists(path)
+    if file_exists == True:
+        print(f"topics file {path} already exists")
+    elif file_exists == False:
+        f = open(path, "w")
+        f.write("topic,desc")
+        f.close()
+        print(f"creating topics file at {path}")
 
+def read(path):
+    with open(path, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            print(row)
+
+def diff(list, topic):
+    difflist = difflib.get_close_matches(topic,list,cutoff=0.4)
+    print(f"did you mean one of these topics? {difflist}")
+    print("if no suitable topic listed, use crte(path, topic, desc) to create one")
+
+def chck(path,topic):
+    with open(path, 'r') as file:
+        reader = csv.reader(file)
+        topiclist=[]
+        for row in reader:
+            topiclist.append(row[0])
+        if topic in topiclist:
+            print(f"{topic} found!")
+        else:
+            print(f"couldnt find topic {topic}")
+            diff(topiclist,topic)
+
+def crte(path,topic,desc):
+    f = open(path, "a+")
+    f.write("\n"+topic+","+desc)
+    f.close()
+    print(f"creating topic {topic} in {path}")
 
 # Callback when the subscribed topic receives a message
 def on_message_received(topic, payload, dup, qos, retain, **kwargs):
@@ -147,6 +184,7 @@ if __name__ == '__main__':
     # Future.result() waits until a result is available
     connect_future.result()
     print("Connected!")
+
 
     # Subscribe
     print("Subscribing to topic '{}'...".format(args.topic))

@@ -107,7 +107,10 @@ def main():
     print("Connected!")
 
     # Subscribe
-    print("Subscribing to all topics")
+    if args.topic == "#":
+        print("Subscribing to all topics")
+    else:
+        print("Subscribing to topic '{}'...".format(args.topic))
     subscribe_future, packet_id = mqtt_connection.subscribe(
         topic=args.topic,
         qos=mqtt.QoS.AT_LEAST_ONCE,
