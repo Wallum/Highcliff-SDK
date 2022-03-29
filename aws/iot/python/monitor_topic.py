@@ -102,9 +102,8 @@ def read(path):
 def diff(list, topic):
     difflist = difflib.get_close_matches(topic,list,cutoff=0.4)
     print(f"did you mean one of these topics? {difflist}")
-    print("if no suitable topic listed, use:")
-    print("'--topic=create:path,topic,desc' to create one")
-    print("NO SPACES MUST BE USED")
+    print("if no suitable topic listed use:")
+    print("'--topic=#list#' to list all topics created")
 
 def chck(path,topic):
     with open(path, 'r') as file:
@@ -156,6 +155,7 @@ def main():
         flex(args.topicspath)
         if args.topic == "#list#":
             read(args.topicspath)
+            sys.exit()
         else:
             chck(args.topicspath, args.topic)
             print("Subscribing to topic '{}'...".format(args.topic))
