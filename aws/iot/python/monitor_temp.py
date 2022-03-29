@@ -62,6 +62,10 @@ def parse_args():
         '--verbosity', choices=[x.name for x in io.LogLevel],
         default=io.LogLevel.NoLogs.name, help='Logging level'
     )
+    parser.add_argument(
+        '--topicspath', choices=[x.name for x in io.LogLevel],
+        default="../../../topics.csv", help='path to topics file'
+    )
     return parser.parse_args()
 
 args = parse_args()
@@ -191,16 +195,16 @@ if __name__ == '__main__':
     connect_future.result()
     print("Connected!")
 
-    topic_default_path = "../../../topics.csv"
-    flex(topic_default_path)
+    # topic_default_path = "../../../topics.csv"
+    flex(args.topicspath)
 
-    print(args.topic)
     if "create:" in args.topic:
         paras2 = args.topic.split(":")
         paras3 = paras2[1].split(",")
         crte(paras3[0],paras3[1],paras3[2])
+        chck(paras3[0],paras3[1])
 
-    chck(topic_default_path, args.topic)
+    chck(args.topicspath, args.topic)
 
     # Subscribe
     print("Subscribing to topic '{}'...".format(args.topic))
