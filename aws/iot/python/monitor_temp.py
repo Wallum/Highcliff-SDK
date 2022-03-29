@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0.
 
 import argparse
+from email.policy import default
+
+from numpy import empty
 from awscrt import io, mqtt
 from awsiot import mqtt_connection_builder
 import sys
@@ -111,6 +114,12 @@ def _checkTemp(file_name: str, historic_temp: float):
                 return False, historic_temp, sample_time
     
 def flex(path):
+    
+    # DEBUG
+    default_path = "../../../topics.csv"
+    path = default_path
+    # DEBUG
+
     file_exists = os.path.exists(path)
     if file_exists == True:
         print(f"topics file {path} already exists")
@@ -185,6 +194,7 @@ if __name__ == '__main__':
     connect_future.result()
     print("Connected!")
 
+    flex("path")
 
     # Subscribe
     print("Subscribing to topic '{}'...".format(args.topic))
