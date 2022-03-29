@@ -114,12 +114,6 @@ def _checkTemp(file_name: str, historic_temp: float):
                 return False, historic_temp, sample_time
     
 def flex(path):
-    
-    # DEBUG
-    default_path = "../../../topics.csv"
-    path = default_path
-    # DEBUG
-
     file_exists = os.path.exists(path)
     if file_exists == True:
         print(f"topics file {path} already exists")
@@ -194,7 +188,9 @@ if __name__ == '__main__':
     connect_future.result()
     print("Connected!")
 
-    flex("path")
+    topic_default_path = "../../../topics.csv"
+    flex(topic_default_path)
+    chck(topic_default_path, args.topic)
 
     # Subscribe
     print("Subscribing to topic '{}'...".format(args.topic))
