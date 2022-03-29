@@ -145,6 +145,7 @@ def chck(path,topic):
         else:
             print(f"couldnt find topic {topic}")
             diff(topiclist,topic)
+            sys.exit()
 
 def crte(path,topic,desc):
     f = open(path, "a+")
