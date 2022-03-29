@@ -150,11 +150,11 @@ def main():
     if args.topic == "#":
         print("Subscribing to all topics")
     else:
-        flex(args.topicpath)
+        flex(args.topicpaths)
         if args.topic == "#list#":
-            read(args.topicpath)
+            read(args.topicpaths)
         else:
-            chck(args.topicpath, args.topic)
+            chck(args.topicpaths, args.topic)
             print("Subscribing to topic '{}'...".format(args.topic))
 
     subscribe_future, packet_id = mqtt_connection.subscribe(
