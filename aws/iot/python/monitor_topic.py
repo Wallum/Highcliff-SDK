@@ -42,6 +42,10 @@ def parse_args():
         '--verbosity', choices=[x.name for x in io.LogLevel],
         default=io.LogLevel.NoLogs.name, help='Logging level'
     )
+    parser.add_argument(
+        '--topicspath', choices=[x.name for x in io.LogLevel],
+        default="../../../topics.csv", help='path to topics file'
+    )
     return parser.parse_args()
 
 
@@ -75,6 +79,42 @@ def on_resubscribe_complete(resubscribe_future):
 # Callback when the subscribed topic receives a message
 def on_message_received(topic, payload, dup, qos, retain, **kwargs):
     print("Received message from topic '{}': {}".format(topic, payload))
+
+    def flex(path):
+    file_exists = os.path.exists(path)
+    if file_exists == True:
+        print(f"topics file {path} already exists")
+    elif file_exists == False:
+        f = open(path, "w")
+        f.write("topic,desc")
+        f.close()
+        print(f"creating topics file at {path}")
+
+def read(path):
+    with open(path, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            print(row)
+
+def diff(list, topic):
+    difflist = difflib.get_close_matches(topic,list,cutoff=0.4)
+    print(f"did you mean one of these topics? {difflist}")
+    print("if no suitable topic listed, use:")
+    print("'--topic=create:path,topic,desc' to create one")
+    print("NO SPACES MUST BE USED")
+
+def chck(path,topic):
+    with open(path, 'r') as file:
+        reader = csv.reader(file)
+        topiclist=[]
+        for row in reader:
+            topiclist.append(row[0])
+        if topic in topiclist:
+            print(f"{topic} found!")
+        else:
+            print(f"couldnt find topic {topic}")
+            diff(topiclist,topic)
+            sys.exit()
 
 def main():
     args = parse_args()
@@ -110,7 +150,13 @@ def main():
     if args.topic == "#":
         print("Subscribing to all topics")
     else:
-        print("Subscribing to topic '{}'...".format(args.topic))
+        flex(args.topicpath)
+        if args.topic == "#list#":
+            read(args.topicpath)
+        else:
+            chck(args.topicpath, args.topic)
+            print("Subscribing to topic '{}'...".format(args.topic))
+            
     subscribe_future, packet_id = mqtt_connection.subscribe(
         topic=args.topic,
         qos=mqtt.QoS.AT_LEAST_ONCE,
