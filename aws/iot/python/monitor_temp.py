@@ -132,7 +132,9 @@ def read(path):
 def diff(list, topic):
     difflist = difflib.get_close_matches(topic,list,cutoff=0.4)
     print(f"did you mean one of these topics? {difflist}")
-    print("if no suitable topic listed, use '--topic=create:path,topic,desc' to create one")
+    print("if no suitable topic listed, use:")
+    print("'--topic=create:path,topic,desc' to create one")
+    print("NO SPACES MUST BE USED")
 
 def chck(path,topic):
     with open(path, 'r') as file:
@@ -196,9 +198,7 @@ if __name__ == '__main__':
     if "create:" in args.topic:
         paras2 = args.topic.split(":")
         paras3 = paras2[1].split(",")
-        print(paras3[0])
-        print(paras3[1])
-        print(paras3[2])
+        crte(paras3[0],paras3[1],paras3[2])
 
     chck(topic_default_path, args.topic)
 
