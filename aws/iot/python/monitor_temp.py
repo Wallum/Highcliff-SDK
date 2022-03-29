@@ -195,7 +195,7 @@ if __name__ == '__main__':
     if "create:" in args.topic:
         "create:path,topic,desc"
         paras1 = args.topic
-        paras2 = paras1.split(":")[2]
+        paras2 = paras1.split(":")[1]
         paras2.split(",")
         print(paras2[0]+","+paras2[2]+","+paras2[4])
 
