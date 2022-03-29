@@ -194,11 +194,11 @@ if __name__ == '__main__':
 
     print(args.topic)
     if "create:" in args.topic:
-        "create:path,topic,desc"
-        paras1 = args.topic
-        paras2 = paras1.split(":")[1]
-        paras2.split(",")
-        print(paras2[0]+","+paras2[2]+","+paras2[4])
+        paras2 = args.topic.split(":")
+        paras3 = paras2[1].split(",")
+        print(paras3[0])
+        print(paras3[1])
+        print(paras3[2])
 
     chck(topic_default_path, args.topic)
 
