@@ -6,6 +6,9 @@ from awsiot import mqtt_connection_builder
 import sys
 import time
 from uuid import uuid4
+import csv
+import difflib
+import os.path
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Send and receive messages through and MQTT connection.")
