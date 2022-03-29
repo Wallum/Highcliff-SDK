@@ -4,8 +4,6 @@
 
 import argparse
 from email.policy import default
-
-from numpy import empty
 from awscrt import io, mqtt
 from awsiot import mqtt_connection_builder
 import sys
