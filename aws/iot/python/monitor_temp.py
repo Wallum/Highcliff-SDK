@@ -203,8 +203,8 @@ if __name__ == '__main__':
         paras3 = paras2[1].split(",")
         crte(paras3[0],paras3[1],paras3[2])
         chck(paras3[0],paras3[1])
-
-    chck(args.topicspath, args.topic)
+    else:
+        chck(args.topicspath, args.topic)
 
     # Subscribe
     print("Subscribing to topic '{}'...".format(args.topic))
