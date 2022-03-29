@@ -192,6 +192,7 @@ if __name__ == '__main__':
     topic_default_path = "../../../topics.csv"
     flex(topic_default_path)
 
+    print(args.topic)
     if "create:" in args.topic:
         "create:path,topic,desc"
         paras1 = args.topic
