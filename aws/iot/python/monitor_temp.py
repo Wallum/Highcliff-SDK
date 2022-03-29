@@ -12,6 +12,8 @@ import time
 from uuid import uuid4
 import json
 import csv
+import difflib
+import os.path
 
 # This sample is based off the aws 'pubsub.py' example:
 # https://github.com/aws/aws-iot-device-sdk-python-v2/blob/main/samples/pubsub.py
