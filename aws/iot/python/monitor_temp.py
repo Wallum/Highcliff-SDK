@@ -132,7 +132,7 @@ def read(path):
 def diff(list, topic):
     difflist = difflib.get_close_matches(topic,list,cutoff=0.4)
     print(f"did you mean one of these topics? {difflist}")
-    print("if no suitable topic listed, use crte(path, topic, desc) to create one")
+    print("if no suitable topic listed, use ""-topic=create:path,topic,desc"" to create one")
 
 def chck(path,topic):
     with open(path, 'r') as file:
@@ -191,6 +191,14 @@ if __name__ == '__main__':
 
     topic_default_path = "../../../topics.csv"
     flex(topic_default_path)
+
+    if "create:" in args.topic:
+        "create:path,topic,desc"
+        paras1 = args.topic
+        paras2 = paras1.split(":")[1]
+        paras2.split(",")
+        print(paras2[0]+","+paras2[1]+","+paras2[2])
+
     chck(topic_default_path, args.topic)
 
     # Subscribe
