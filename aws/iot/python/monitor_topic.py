@@ -80,7 +80,7 @@ def on_resubscribe_complete(resubscribe_future):
 def on_message_received(topic, payload, dup, qos, retain, **kwargs):
     print("Received message from topic '{}': {}".format(topic, payload))
 
-    def flex(path):
+def flex(path):
     file_exists = os.path.exists(path)
     if file_exists == True:
         print(f"topics file {path} already exists")
@@ -156,7 +156,7 @@ def main():
         else:
             chck(args.topicpath, args.topic)
             print("Subscribing to topic '{}'...".format(args.topic))
-            
+
     subscribe_future, packet_id = mqtt_connection.subscribe(
         topic=args.topic,
         qos=mqtt.QoS.AT_LEAST_ONCE,
