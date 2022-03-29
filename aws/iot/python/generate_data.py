@@ -31,7 +31,7 @@ class GenerateData:
 
 
 def parse_arguments():
-    default_data_file = os.path.join(tempfile.mkdtemp(), 'temps.csv')
+    default_data_file = 'temps.csv'
     parser = argparse.ArgumentParser(description="Generate random temperatures and store them in a file.")
     parser.add_argument('--data-file', default=default_data_file, type=str, help="File path for output data.")
     return parser.parse_args()
