@@ -65,7 +65,11 @@ class AI:
 
     def add_capability(self, action):
         self._capabilities.append(action)
-        print(self._capabilities[0].effects)
+
+        # log the registration of the action
+        if self._debug_logging:
+            log_event_to_the_terminal_window("Registered an action " +
+                                             str(action) + " with effects " + str(action.effects))
 
     # TODO: add code to remove a capability
 

@@ -9,15 +9,15 @@ import rpyc
 from rpyc.utils.server import ThreadedServer
 
 
-class ComplexObjectRunner:
-    _complex_objects = []
+class AI:
+    _capabilities = []
 
-    def register_complex_object(self, complex_object):
-        self._complex_objects.append(complex_object)
+    def add_capability(self, action):
+        self._capabilities.append(action)
         print("registered a complex object")
 
     def run_complex_objects(self):
-        for complex_object in self._complex_objects:
+        for complex_object in self._capabilities:
             print("running", complex_object.get_name(), "with effects", complex_object.effects)
             complex_object.act()
             print("ran a complex object")
@@ -28,7 +28,7 @@ class ExperimentalServer(rpyc.Service):
     _complex_object_runner = None
 
     def _init_server(self):
-        self._complex_object_runner = ComplexObjectRunner()
+        self._complex_object_runner = AI()
         print("initialized server")
 
     def on_connect(self, conn):
