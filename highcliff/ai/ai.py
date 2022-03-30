@@ -52,9 +52,10 @@ class AI:
 
     def connect(self, endpoint="a15645u9kev0b1-ats.iot.eu-west-2.amazonaws.com",
                 port=8883, cert="/home/ubuntu/certs/certificate.pem.crt",
-                key="/home/ubuntu/certs/private.pem.key"):
+                key="/home/ubuntu/certs/private.pem.key",
+                topic='#'):
         self.__network = MqttNetwork.instance()
-        self.__network.connect(endpoint, port, cert, key)
+        self.__network.connect(endpoint, port, cert, key, topic)
 
     def set_goals(self, goals):
         self._goals = goals

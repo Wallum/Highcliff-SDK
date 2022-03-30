@@ -133,7 +133,8 @@ class MqttNetwork(Network):
     def connect(self, endpoint="a15645u9kev0b1-ats.iot.eu-west-2.amazonaws.com",
                 port=8883, cert="/home/ubuntu/certs/certificate.pem.crt",
                 key="/home/ubuntu/certs/private.pem.key",
-                client_id=None, world_topic='world', topic='#'):
+                topic='#',
+                client_id=None, world_topic='world'):
         self.world_topic = world_topic
         if client_id is None:
             client_id = "HighCliff-" + str(uuid4())

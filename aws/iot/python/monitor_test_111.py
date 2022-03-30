@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0.
 
 import argparse
-from email.policy import default
 from awscrt import io, mqtt
 from awsiot import mqtt_connection_builder
 import sys
@@ -12,8 +11,6 @@ import time
 from uuid import uuid4
 import json
 import csv
-import difflib
-import os.path
 
 # This sample is based off the aws 'pubsub.py' example:
 # https://github.com/aws/aws-iot-device-sdk-python-v2/blob/main/samples/pubsub.py
@@ -47,7 +44,7 @@ def parse_args():
         help="Client ID for MQTT connection: use 'device' found in /home/ubuntu/vars"
     )
     parser.add_argument(
-        '--topic', default="test/temperatures",
+        '--topic', default="111",
         help="Topic to subscribe to, and publish messages to."
     )
     parser.add_argument(
@@ -61,10 +58,6 @@ def parse_args():
     parser.add_argument(
         '--verbosity', choices=[x.name for x in io.LogLevel],
         default=io.LogLevel.NoLogs.name, help='Logging level'
-    )
-    parser.add_argument(
-        '--topicspath', choices=[x.name for x in io.LogLevel],
-        default="../../../topics.csv", help='path to topics file'
     )
     return parser.parse_args()
 
@@ -117,47 +110,7 @@ def _checkTemp(file_name: str, historic_temp: float):
             else:
                 return False, historic_temp, sample_time
     
-def flex(path):
-    file_exists = os.path.exists(path)
-    if file_exists == True:
-        print(f"topics file {path} already exists")
-    elif file_exists == False:
-        f = open(path, "w")
-        f.write("topic,desc")
-        f.close()
-        print(f"creating topics file at {path}")
 
-def read(path):
-    with open(path, 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            print(row)
-
-def diff(list, topic):
-    difflist = difflib.get_close_matches(topic,list,cutoff=0.4)
-    print(f"did you mean one of these topics? {difflist}")
-    print("if no suitable topic listed use:")
-    print("'--topic=create:path,topic,desc' to create one")
-    print("NO SPACES MUST BE USED - please use underscores")
-
-def chck(path,topic):
-    with open(path, 'r') as file:
-        reader = csv.reader(file)
-        topiclist=[]
-        for row in reader:
-            topiclist.append(row[0])
-        if topic in topiclist:
-            print(f"{topic} found!")
-        else:
-            print(f"couldnt find topic {topic}")
-            diff(topiclist,topic)
-            sys.exit()
-
-def crte(path,topic,desc):
-    f = open(path, "a+")
-    f.write("\n"+topic+","+desc)
-    f.close()
-    print(f"creating topic {topic} in {path}")
 
 # Callback when the subscribed topic receives a message
 def on_message_received(topic, payload, dup, qos, retain, **kwargs):
@@ -194,17 +147,6 @@ if __name__ == '__main__':
     # Future.result() waits until a result is available
     connect_future.result()
     print("Connected!")
-
-    # topic_default_path = "../../../topics.csv"
-    flex(args.topicspath)
-
-    if "create:" in args.topic:
-        paras2 = args.topic.split(":")
-        paras3 = paras2[1].split(",")
-        crte(paras3[0],paras3[1],paras3[2])
-        chck(paras3[0],paras3[1])
-    else:
-        chck(args.topicspath, args.topic)
 
     # Subscribe
     print("Subscribing to topic '{}'...".format(args.topic))
