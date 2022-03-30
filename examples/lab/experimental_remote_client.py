@@ -7,9 +7,6 @@ from goap.action import Action
 class AIAction(Action):
     _object_name = None
 
-    # ai that calls the action when needed
-    _ai = None
-
     def __init__(self, object_name):
         self._object_name = object_name
         self.effects = {"prop1": "value1", "prop2": "value2", "prop3": "value3"}
@@ -42,8 +39,8 @@ def start_client():
 
     obj1 = AIAction("obj1")
     obj2 = AIAction("obj2")
-    complex_object_runner.register_complex_object(obj1)
-    complex_object_runner.register_complex_object(obj2)
+    complex_object_runner.add_capability(obj1)
+    complex_object_runner.add_capability(obj2)
     print("registered 2 complex objects with the remote complex object runner")
 
     complex_object_runner.run_complex_objects()
