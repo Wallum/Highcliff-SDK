@@ -40,7 +40,7 @@ class MyTestCase(unittest.TestCase):
         self.highcliff.set_goals(goal)
 
         # run a local version of Highcliff
-        self.highcliff.run(life_span_in_iterations=3)
+        self.highcliff.act(life_span_in_iterations=3)
 
         # the plan should have started with two steps, then progress to a single step
         self.assertEqual(3, len(self.highcliff.diary()[0]['my_plan']))

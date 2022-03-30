@@ -47,8 +47,8 @@ network = highcliff.network()
 
 # define a test body temperature monitor
 class TestBodyTemperatureMonitor(MonitorBodyTemperature):
-    def behavior(self):
-        print("We are now monitoring body temperature")
+  def behavior(self):
+    print("We are now monitoring body temperature")
 
 
 # instantiate the test body temperature monitor
@@ -59,7 +59,7 @@ network.update_the_world({})
 
 # run a local version of Highcliff
 highcliff.set_goals({"is_room_temperature_change_needed": True})
-highcliff.run(life_span_in_iterations=1)
+highcliff.act(life_span_in_iterations=1)
 
 ```
 
@@ -105,7 +105,7 @@ network.update_the_world({})
 
 # run a local version of Highcliff
 highcliff.set_goals({"is_room_temperature_change_needed": True})
-highcliff.run(life_span_in_iterations=1)
+highcliff.act(life_span_in_iterations=1)
 ```
 
 The AI will select a goal, create a plan, and (if properly configured) select and run your action. You should see the custom behavior you specified running locally.

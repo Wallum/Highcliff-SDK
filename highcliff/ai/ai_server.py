@@ -81,6 +81,7 @@ class AIServer(rpyc.Service):
 def start_ai_server():
     port = int(os.environ["port"])
     thread = ThreadedServer(AIServer(), port=port, protocol_config={"allow_all_attrs": True,
+                                                                    "allow_public_attrs": True,
                                                                     "allow_setattr": True,
                                                                     "instantiate_custom_exceptions": True,
                                                                     "import_custom_exceptions": True

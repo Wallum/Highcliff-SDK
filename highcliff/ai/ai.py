@@ -43,7 +43,6 @@ class AI:
     _capabilities = []
     _diary = []
     _debug_logging = False
-    _foo = []
 
     def set_debug_logging(self, debug_logging):
         self._debug_logging = debug_logging
@@ -58,8 +57,8 @@ class AI:
         return self._capabilities
 
     def add_capability(self, action):
-        action.act()
         self._capabilities.append(action)
+        print(self._capabilities[0].effects)
 
     # TODO: add code to remove a capability
 
@@ -68,25 +67,31 @@ class AI:
 
         # if the life span is specified as some positive number, stay alive for that number of iterations
         if life_span_in_iterations > 0:
-            # log that the ai is running
-            if self._debug_logging:
-                log_event_to_the_terminal_window("Running the AI for " + str(life_span_in_iterations) + " iterations")
-            # run the ai
-            for iteration in range(life_span_in_iterations):
-                self._run_ai()
-                # pause to allow for processing in other areas of the ai
-                time.sleep(seconds_to_pause_between_ai_runs)
+            self._run_temporarily(life_span_in_iterations, seconds_to_pause_between_ai_runs)
 
         # if the life span is specified as -1, run forever
         else:
-            # log that the ai is running
-            if self._debug_logging:
-                log_event_to_the_terminal_window("Running the AI indefinitely")
-            # run the ai
-            while True:
-                self._run_ai()
-                # pause to allow for processing in other areas of the ai
-                time.sleep(seconds_to_pause_between_ai_runs)
+            self._run_indefinitely(seconds_to_pause_between_ai_runs)
+
+    def _run_indefinitely(self, seconds_to_pause_between_ai_runs):
+        # log that the ai is running
+        if self._debug_logging:
+            log_event_to_the_terminal_window("Running the AI indefinitely")
+        # run the ai
+        while True:
+            self._run_ai()
+            # pause to allow for processing in other areas of the ai
+            time.sleep(seconds_to_pause_between_ai_runs)
+
+    def _run_temporarily(self, life_span_in_iterations, seconds_to_pause_between_ai_runs):
+        # log that the ai is running
+        if self._debug_logging:
+            log_event_to_the_terminal_window("Running the AI for " + str(life_span_in_iterations) + " iterations")
+        # run the ai
+        for iteration in range(life_span_in_iterations):
+            self._run_ai()
+            # pause to allow for processing in other areas of the ai
+            time.sleep(seconds_to_pause_between_ai_runs)
 
     def reset(self):
         self._network.reset()
@@ -170,7 +175,7 @@ class AI:
             # execute the first act in the plan. it will affect the world and get us one step closer to the goal
             # the plan will be updated and actions executed until the goal is reached
             intended_effect = copy.copy(next_action.effects)
-            next_action.act()
+            next_action.act(self.network())
 
             # log that the ai has taken an action
             if self._debug_logging:

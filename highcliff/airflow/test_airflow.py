@@ -89,7 +89,7 @@ class TestAirflow(unittest.TestCase):
         self.highcliff.set_goals(goal)
 
         # run a local version of Highcliff
-        self.highcliff.run(life_span_in_iterations=8)
+        self.highcliff.act(life_span_in_iterations=8)
 
         # did the ai recognize obstacles
         self.assertEqual(ActionStatus.FAIL, self.highcliff.diary()[0]["action_status"])

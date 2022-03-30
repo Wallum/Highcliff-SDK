@@ -3,6 +3,7 @@ __copyright__ = "Copyright (C) 2020 appliedAIstudio"
 __version__ = "0.1"
 
 # needed to continue monitoring body temperature for a given period of time
+import os
 import time
 from threading import Thread
 
@@ -42,8 +43,10 @@ class BodyTemperatureMonitor(MonitorTemperature):
 def run_body_temperature_monitor():
     # create a connection. we assume that the ai server has been started at the specified ip address and port
     # todo: put host and port into environment variables
-    connection = rpyc.connect("localhost", 18861,
+    port = os.environ['port']
+    connection = rpyc.connect("localhost", port,
                               config={"allow_all_attrs": True,
+                                      "allow_public_attrs": True,
                                       "allow_setattr": True,
                                       "instantiate_custom_exceptions": True,
                                       "import_custom_exceptions": True
