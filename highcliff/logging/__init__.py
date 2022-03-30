@@ -1,0 +1,1 @@
+from highcliff.logging.logging import log_event_to_the_terminal_window

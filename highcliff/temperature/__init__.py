@@ -1,1 +1,1 @@
-from temperature import MonitorTemperature, AuthorizeTemperatureAdjustment, AdjustTemperature
+from highcliff.temperature.temperature import MonitorTemperature, AuthorizeTemperatureAdjustment, AdjustTemperature

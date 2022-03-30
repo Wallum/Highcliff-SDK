@@ -50,7 +50,7 @@ class TestAIActions(unittest.TestCase):
         self.assertEqual({}, self.network.the_world())
 
         # initiate the action
-        test_successful_action.act()
+        test_successful_action.act(self.network)
 
         # the action should have the intended effect on the world
         self.assertEqual(test_successful_action.effects, self.network.the_world())
@@ -63,7 +63,7 @@ class TestAIActions(unittest.TestCase):
         self.assertEqual({}, self.network.the_world())
 
         # initiate the action
-        test_unsuccessful_action.act()
+        test_unsuccessful_action.act(self.network)
 
         # the action should not have the intended effect on the world
         unintended_effect = {"test_action_complete": False}
@@ -78,7 +78,7 @@ class TestAIActions(unittest.TestCase):
         self.assertEqual({"test_action_complete": True}, test_successful_action.effects)
 
         # initiate the action
-        test_successful_action.act()
+        test_successful_action.act(self.network)
 
         # the preconditions and effects of a successful act should be as expected after running
         self.assertEqual({}, test_successful_action.preconditions)
@@ -93,7 +93,7 @@ class TestAIActions(unittest.TestCase):
         self.assertEqual({"test_action_complete": True}, test_unsuccessful_action.effects)
 
         # initiate the action
-        test_unsuccessful_action.act()
+        test_unsuccessful_action.act(self.network)
 
         # the preconditions and effects of a successful act should be as expected after running
         self.assertEqual({}, test_unsuccessful_action.preconditions)

@@ -2,6 +2,7 @@ __author__ = "Jerry Overton"
 __copyright__ = "Copyright (C) 2020 appliedAIstudio"
 __version__ = "0.1"
 
+import os
 import pprint
 import unittest
 
@@ -156,10 +157,12 @@ class TestAI(unittest.TestCase):
         ai_server_thread.start()
 
         # create a connection
-        connection = rpyc.connect("localhost", 18861)
+        port = os.environ['port']
+        connection = rpyc.connect("localhost", port)
 
         # verify the connection
         ai = connection.root.get_ai_instance()
+        from highcliff.actions import AIaction
 
         # verify that we are connected to an object of the expected type
         expected_type_for_ai_object = "<netref class 'rpyc.core.netref.Singleton'>"

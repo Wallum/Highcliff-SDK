@@ -122,7 +122,7 @@ class TestHighcliffExamples(unittest.TestCase):
         self.highcliff.set_goals({"is_room_temperature_change_needed": True})
 
         # run a local version of Highcliff
-        self.highcliff.run(life_span_in_iterations=1)
+        self.highcliff.act(life_span_in_iterations=1)
 
         # the action should complete unsuccessfully
         self.assertEqual(ActionStatus.SUCCESS, self.highcliff.diary()[0]['action_status'])
@@ -134,7 +134,7 @@ class TestHighcliffExamples(unittest.TestCase):
         class TestFailedAction(MonitorBodyTemperature):
 
             def action_failure(self):
-                self.effects['is_body_temperature_monitored'] = False
+                self.actual_effects['is_room_temperature_change_needed'] = False
 
             def behavior(self):
                 self.action_failure()
@@ -142,11 +142,11 @@ class TestHighcliffExamples(unittest.TestCase):
         TestFailedAction(self.highcliff)
 
         # define the test world state and goals
-        self.network.update_the_world({"is_body_temperature_monitored": False})
-        self.highcliff.set_goals({"is_body_temperature_monitored": True})
+        self.network.update_the_world({})
+        self.highcliff.set_goals({"is_room_temperature_change_needed": True})
 
         # run a local version of Highcliff
-        self.highcliff.run(life_span_in_iterations=1)
+        self.highcliff.act(life_span_in_iterations=1)
 
         # the action should complete unsuccessfully
         self.assertEqual(ActionStatus.FAIL, self.highcliff.diary()[0]['action_status'])
@@ -167,7 +167,7 @@ class TestHighcliffExamples(unittest.TestCase):
         self.highcliff.set_goals({"is_room_temperature_change_needed": True})
 
         # run a local version of Highcliff
-        self.highcliff.run(life_span_in_iterations=1)
+        self.highcliff.act(life_span_in_iterations=1)
 
         # the action should complete successfully
         self.assertEqual(ActionStatus.SUCCESS, self.highcliff.diary()[0]['action_status'])
@@ -212,7 +212,7 @@ class TestHighcliffExamples(unittest.TestCase):
         self.highcliff.set_goals({"is_room_temperature_change_authorized": True})
 
         # run a local version of Highcliff
-        self.highcliff.run(life_span_in_iterations=2)
+        self.highcliff.act(life_span_in_iterations=2)
 
         # the plan should have started with two steps, then progress to a single step
         self.assertEqual(2, len(self.highcliff.diary()[0]['my_plan']))
@@ -249,7 +249,7 @@ class TestHighcliffExamples(unittest.TestCase):
         self.highcliff.set_goals({"is_room_temperature_comfortable": True})
 
         # run a local version of Highcliff
-        self.highcliff.run(life_span_in_iterations=3)
+        self.highcliff.act(life_span_in_iterations=3)
 
         # the plan should have started with two steps, then progress to a single step
         self.assertEqual(3, len(self.highcliff.diary()[0]['my_plan']))

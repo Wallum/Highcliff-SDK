@@ -16,15 +16,10 @@ import copy
 
 class AIaction(Action):
 
-    # ai that calls the action when needed
-    __ai = None
-
     def __init__(self, ai):
-        # set a reference to the artificial intelligence
-        self.__ai = ai
 
         # an action integrates itself with the communication infrastructure
-        self.__integrate()
+        self._integrate(ai)
 
         # the intended effect of the action on the world
         self.effects = {}
@@ -32,21 +27,22 @@ class AIaction(Action):
         # the actual effect of the action on the world
         self.actual_effects = None
 
-    def __integrate(self):
+    def _integrate(self, ai):
         # as part of integration, an action registers itself as a capability for highcliff
-        self.__ai.add_capability(self)
+        ai.add_capability(self)
 
-    def update_the_world(self, update):
+    @staticmethod
+    def update_the_world(network, update):
         # update the world state of highcliff
-        self.__ai.network().update_the_world(update)
+        network.update_the_world(update)
 
-    def act(self):
+    def act(self, network):
         # assume that the act will have the intended effect
         self.actual_effects = copy.copy(self.effects)
 
         # every AI action runs custom behavior. this behavior may change the actual effects
         self.behavior()
-        self.update_the_world(self.actual_effects)
+        self.update_the_world(network, self.actual_effects)
 
     def behavior(self):
         # custom behavior must be specified by anyone implementing an AI action
