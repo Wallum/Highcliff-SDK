@@ -1,3 +1,7 @@
+__author__ = "Jerry Overton"
+__copyright__ = "Copyright (C) 2020 appliedAIstudio"
+__version__ = "0.1"
+
 import unittest
 
 
