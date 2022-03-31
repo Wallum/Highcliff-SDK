@@ -7,7 +7,8 @@ from goap.action import Action
 class AIAction(Action):
     _object_name = None
 
-    def __init__(self, object_name):
+    def __init__(self, object_name, ai):
+
         self._object_name = object_name
         self.effects = {"prop1": "value1", "prop2": "value2", "prop3": "value3"}
 
@@ -16,6 +17,10 @@ class AIAction(Action):
 
     def get_name(self):
         return self._object_name
+
+    def _integrate(self, ai):
+        # as part of integration, an action registers itself as a capability for highcliff
+        ai.add_capability(self)
 
 
 def start_client():
@@ -34,16 +39,20 @@ def start_client():
 
     # get a reference to the complex object runner
     # verify the connection
-    complex_object_runner = connection.root.get_complex_object_runner()
+    ai = connection.root.get_complex_object_runner()
     print("got a reference to a remote complex object runner")
 
-    obj1 = AIAction("obj1")
-    obj2 = AIAction("obj2")
-    complex_object_runner.add_capability(obj1)
-    complex_object_runner.add_capability(obj2)
-    print("registered 2 complex objects with the remote complex object runner")
+    # create the new actions
+    obj1 = AIAction("obj1", ai)
+    obj2 = AIAction("obj2", ai)
 
-    complex_object_runner.run_complex_objects()
+    # explicitly register the actions with the ai
+    ai.add_capability(obj1)
+    ai.add_capability(obj2)
+
+    print("created 2 actions with the remote ai")
+
+    ai.run_complex_objects()
     print("ran the remote complex object runner")
 
 

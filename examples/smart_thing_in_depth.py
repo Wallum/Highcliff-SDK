@@ -3,7 +3,6 @@ __copyright__ = "Copyright (C) 2020 appliedAIstudio"
 __version__ = "0.1"
 
 # needed to get room temperature readings
-from temperature_sensor import TemperatureScale, get_body_temperature
 
 # needed to run a local version of the AI
 from highcliff.ai import AI

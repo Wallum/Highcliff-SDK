@@ -14,7 +14,7 @@ class AI:
 
     def add_capability(self, action):
         self._capabilities.append(action)
-        print("registered a complex object")
+        print("registered a complex object", action, "with effects", action.effects)
 
     def run_complex_objects(self):
         for complex_object in self._capabilities:

@@ -56,7 +56,8 @@ def run_body_temperature_monitor():
     print("connected to the remote AI server")
 
     # run the body temperature model and register it with the highcliff ai
-    BodyTemperatureMonitor(highcliff_ai)
+    monitor = BodyTemperatureMonitor(highcliff_ai)
+    highcliff_ai.add_capability(monitor)
     print("registered with the remote AI server")
 
     # keep the body temperature active in the background for a period of time

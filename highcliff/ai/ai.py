@@ -50,6 +50,7 @@ class AI:
     def network(self):
         return self._network
 
+    # TODO: make the local network the default and give the option to connect to mqtt. get rid of __network
     def connect(self, endpoint="a15645u9kev0b1-ats.iot.eu-west-2.amazonaws.com",
                 port=8883, cert="/home/ubuntu/certs/certificate.pem.crt",
                 key="/home/ubuntu/certs/private.pem.key",

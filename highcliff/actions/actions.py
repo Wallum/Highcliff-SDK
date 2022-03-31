@@ -18,18 +18,11 @@ class AIaction(Action):
 
     def __init__(self, ai):
 
-        # an action integrates itself with the communication infrastructure
-        self._integrate(ai)
-
         # the intended effect of the action on the world
         self.effects = {}
 
         # the actual effect of the action on the world
         self.actual_effects = None
-
-    def _integrate(self, ai):
-        # as part of integration, an action registers itself as a capability for highcliff
-        ai.add_capability(self)
 
     @staticmethod
     def update_the_world(network, update):

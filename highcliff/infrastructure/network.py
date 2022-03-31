@@ -8,6 +8,9 @@ import json
 # needed to reference the json schema file from within the host application
 import pkgutil
 
+# used to log system messages in the event of network connection failure
+import sys
+
 # MQTT Networks
 from awscrt import io, mqtt
 from awsiot import mqtt_connection_builder
@@ -32,8 +35,6 @@ class ConnectionIsNotEstablished(Exception):
 
 
 class Network:
-    def __init__(self):
-        pass
 
     def the_world(self):
         # returns a dictionary that describes the current state of the world
@@ -119,9 +120,22 @@ class LocalNetwork(Network):
 
 @Singleton
 class MqttNetwork(Network):
+    # TODO: please comment this code
     def __init__(self):
         self.__mqtt_client = None
         self.__the_world = World()
+
+    # TODO: needs an implementation requirements of the abstract class
+    def publish(self, topic, message):
+        pass
+
+    # TODO: needs an implementation requirements of the abstract class
+    def subscribe(self, topic, callback_function):
+        pass
+
+    # TODO: needs an implementation requirements of the abstract class
+    def create_topic(self, topic):
+        pass
 
     def __del__(self):
         if self.__mqtt_client is not None:
@@ -135,6 +149,7 @@ class MqttNetwork(Network):
                 key="/home/ubuntu/certs/private.pem.key",
                 topic='#',
                 client_id=None, world_topic='world'):
+        # TODO: does this need to be defined in an init?
         self.world_topic = world_topic
         if client_id is None:
             client_id = "HighCliff-" + str(uuid4())
@@ -171,6 +186,7 @@ class MqttNetwork(Network):
     def __publish_message(self, message):
         if not isinstance(message, Message):
             raise InvalidMessageFormat
+        # TODO: this makes reference to a protected attribute. can you please fix
         self.__publish(self.world_topic, message._asdict())
         self.__the_world.update(self.world_topic, message)
 
@@ -232,7 +248,7 @@ class MqttNetwork(Network):
 
             # Cannot synchronously wait for resubscribe result because we're on the connection's event-loop thread,
             # evaluate result with a callback instead.
-            resubscribe_future.add_done_callback(self.__on_resubscribe_complete)
+            resubscribe_future.add_done_callback(cls.__on_resubscribe_complete)
 
     @classmethod
     def __on_resubscribe_complete(cls, resubscribe_future):
