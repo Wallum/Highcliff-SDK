@@ -1,9 +1,9 @@
 __author__ = "Jerry Overton"
-__copyright__ = "Copyright (C) 2020 appliedAIstudio"
-__version__ = "0.1"
+__copyright__ = "Copyright (C) 2022 appliedAIstudio LLC"
+__version__ = "0.0.1"
 
 # needed to run a local version of the AI
-from highcliff.ai import AI
+from ai import AI
 
 # the Highcliff actions to be tested
 from highcliff.exampleactions import MonitorBodyTemperature

@@ -1,6 +1,10 @@
+__author__ = "Jerry Overton"
+__copyright__ = "Copyright (C) 2022 appliedAIstudio LLC"
+__version__ = "0.0.1"
+
 import unittest
 from highcliff.exampleactions import MonitorBodyTemperature, AuthorizeRoomTemperatureChange, ChangeRoomTemperature
-from highcliff.ai import AI, intent_is_real
+from ai import AI, intent_is_real
 
 
 class MyTestCase(unittest.TestCase):

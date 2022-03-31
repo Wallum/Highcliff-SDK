@@ -13,7 +13,7 @@ from goap.planner import RegressivePlanner
 from goap.algo.astar import PathNotFoundException
 
 # used to create and access centralized infrastructure
-from highcliff.infrastructure import LocalNetwork, MqttNetwork
+from infrastructure import LocalNetwork, MqttNetwork
 
 # used to make AI a singleton
 from highcliff.singleton import Singleton

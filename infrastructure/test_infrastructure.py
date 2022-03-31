@@ -1,7 +1,7 @@
 import unittest
 
 # needed to test local infrastructure
-from highcliff.infrastructure import LocalNetwork
+from infrastructure import LocalNetwork
 
 
 class TestInfrastructure(unittest.TestCase):

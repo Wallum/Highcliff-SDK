@@ -1,12 +1,12 @@
 __author__ = "Jerry Overton"
-__copyright__ = "Copyright (C) 2020 appliedAIstudio"
-__version__ = "0.1"
+__copyright__ = "Copyright (C) 2022 appliedAIstudio LLC"
+__version__ = "0.0.1"
 
 import unittest
 
-import highcliff.infrastructure.test_infrastructure as test_infrastructure
+import infrastructure.test_infrastructure as test_infrastructure
 import highcliff.actions.test_actions as test_actions
-import highcliff.ai.test_ai as test_ai
+import ai.test_ai as test_ai
 import highcliff.exampleactions.test_exampleactions as test_example_actions
 import examples.test_examples as test_examples
 

@@ -2,15 +2,13 @@ __author__ = "Jerry Overton"
 __copyright__ = "Copyright (C) 2022 appliedAIstudio LLC"
 __version__ = "0.0.1"
 
-import copy
-import pprint
 import unittest
 
 # needed to connect to the central infrastructure
-from highcliff.infrastructure import InvalidTopic, InvalidMessageFormat
+from infrastructure import InvalidTopic, InvalidMessageFormat
 
 # needed to run a local version of the AI
-from highcliff.ai import AI, intent_is_real
+from ai import AI, intent_is_real
 
 from highcliff.actions import ActionStatus
 

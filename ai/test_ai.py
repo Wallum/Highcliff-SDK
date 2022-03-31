@@ -3,11 +3,10 @@ __copyright__ = "Copyright (C) 2022 appliedAIstudio LLC"
 __version__ = "0.0.1"
 
 import os
-import pprint
 import unittest
 
 from highcliff.exampleactions import MonitorBodyTemperature
-from highcliff.ai import AI
+from ai import AI
 from highcliff.actions import ActionStatus
 
 # needed to start up the remote ai server
@@ -162,7 +161,6 @@ class TestAI(unittest.TestCase):
 
         # verify the connection
         ai = connection.root.get_ai_instance()
-        from highcliff.actions import AIaction
 
         # verify that we are connected to an object of the expected type
         expected_type_for_ai_object = "<netref class 'rpyc.core.netref.Singleton'>"

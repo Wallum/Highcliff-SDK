@@ -5,7 +5,7 @@ __version__ = "0.0.1"
 # needed to run the ai
 import os
 
-from highcliff.ai import AI
+from ai import AI
 
 # needed to run the ai as a remote service
 import rpyc
