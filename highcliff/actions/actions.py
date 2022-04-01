@@ -17,7 +17,7 @@ import copy
 class AIaction(Action):
 
     def __init__(self, ai):
-
+        ai.add_capability(self)
         # the intended effect of the action on the world
         self.effects = {}
 
