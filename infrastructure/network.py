@@ -122,24 +122,12 @@ class LocalNetwork(Network):
             raise InvalidMessageFormat
 
 
-@Singleton
 class MqttNetwork(Network):
-    # TODO: please comment this code
+    """Define and Network class that can be used by devices
+    This class doesn't implement the world"""
     def __init__(self):
+        """Init the MQTT client"""
         self.__mqtt_client = None
-        self.__the_world = World()
-
-    # TODO: needs an implementation requirements of the abstract class
-    def publish(self, topic, message):
-        pass
-
-    # TODO: needs an implementation requirements of the abstract class
-    def subscribe(self, topic, callback_function):
-        pass
-
-    # TODO: needs an implementation requirements of the abstract class
-    def create_topic(self, topic):
-        pass
 
     def __del__(self):
         if self.__mqtt_client is not None:
@@ -150,11 +138,8 @@ class MqttNetwork(Network):
 
     def connect(self, endpoint="a15645u9kev0b1-ats.iot.eu-west-2.amazonaws.com",
                 port=8883, cert="/home/ubuntu/certs/certificate.pem.crt",
-                key="/home/ubuntu/certs/private.pem.key",
-                topic='#',
-                client_id=None, world_topic='world'):
-        # TODO: does this need to be defined in an init?
-        self.world_topic = world_topic
+                key="/home/ubuntu/certs/private.pem.key", client_id=None):
+        """Connect to an MQTT server"""
         if client_id is None:
             client_id = "HighCliff-" + str(uuid4())
 
@@ -176,26 +161,11 @@ class MqttNetwork(Network):
         )
         connect_future = self.__mqtt_client.connect()
         connect_future.result()
-        self.__subscribe(topic)
 
-    def __subscribe(self, topic):
-        subscribe_future, _ = self.__mqtt_client.subscribe(
-            topic=topic,
-            qos=mqtt.QoS.AT_LEAST_ONCE,
-            callback=self.process_external_world_update,
-        )
-        subscribe_result = subscribe_future.result()
-        print(f'Subscribed to {topic}')
-
-    def __publish_message(self, message):
-        if not isinstance(message, Message):
-            raise InvalidMessageFormat
-        # TODO: this makes reference to a protected attribute. can you please fix
-        self.__publish(self.world_topic, message._asdict())
-        self.__the_world.update(self.world_topic, message)
-
-    def __publish(self, topic, message):
+    def publish(self, topic, message):
+        """Publish a message in a topic"""
         self.__validate_connection()
+        self.__validate_message(message)
         payload = json.dumps(message)
         print(f'Publishing in topic {topic}: {payload}')
         self.__mqtt_client.publish(
@@ -204,7 +174,83 @@ class MqttNetwork(Network):
             qos=mqtt.QoS.AT_LEAST_ONCE,
         )
 
+    def subscribe(self, topic, callback_function):
+        """Subcribe to a topic"""
+        self.__validate_connection()
+        subscribe_future, _ = self.__mqtt_client.subscribe(
+            topic=topic,
+            qos=mqtt.QoS.AT_LEAST_ONCE,
+            callback=callback_function,
+        )
+        subscribe_result = subscribe_future.result()
+        print(f'Subscribed to {topic}')
+
+    def create_topic(self, topic):
+        """Doesn't need to create topics using
+        awscrt.mqtt.Connection, they are created automatically"""
+        pass
+
+    def __validate_message(self, json_message):
+        """Validate a message format"""
+        try:
+            validate(json_message, self.__json_schema)
+        except ValidationError:
+            raise InvalidMessageFormat
+
+    def __validate_connection(self):
+        """Validate that the connection has been established"""
+        if self.__mqtt_client is None:
+            raise ConnectionIsNotEstablished("Connection haven't been established, use connect method to do so")
+
+    @classmethod
+    def __on_connection_interrupted(cls, connection, error, **kwargs):
+        """Execute on connection interrupted"""
+        print("Connection interrupted. error: {}".format(error))
+
+    @classmethod
+    def __on_connection_resumed(cls, connection, return_code, session_present, **kwargs):
+        """Execute on connection resume to restore everything"""
+        print("Connection resumed. return_code: {} session_present: {}".format(return_code, session_present))
+
+        if return_code == mqtt.ConnectReturnCode.ACCEPTED and not session_present:
+            print("Session did not persist. Resubscribing to existing topics...")
+            resubscribe_future, _ = connection.resubscribe_existing_topics()
+
+            # Cannot synchronously wait for resubscribe result because we're on the connection's event-loop thread,
+            # evaluate result with a callback instead.
+            resubscribe_future.add_done_callback(cls.__on_resubscribe_complete)
+
+    @classmethod
+    def __on_resubscribe_complete(cls, resubscribe_future):
+        """Check resuscribe is completed"""
+        resubscribe_results = resubscribe_future.result()
+        print("Resubscribe results: {}".format(resubscribe_results))
+        for topic, qos in resubscribe_results['topics']:
+            if qos is None:
+                sys.exit("Server rejected resubscribe to topic: {}".format(topic))
+
+
+@Singleton
+class AiMqttNetwork(MqttNetwork):
+    """MQTT Network that includes world implementation"""
+    def __init__(self):
+        super().__init__()
+        self.__the_world = World()
+        self.__world_topic = 'world'
+
+    def connect(self, endpoint="a15645u9kev0b1-ats.iot.eu-west-2.amazonaws.com",
+                port=8883, cert="/home/ubuntu/certs/certificate.pem.crt",
+                key="/home/ubuntu/certs/private.pem.key", client_id=None):
+        """Connect to an MQTT server and subscribe to every topic"""
+        super().connect(endpoint, port, cert, key, client_id)
+        self.__subscribe_everything()
+
+    def __subscribe_everything(self):
+        """Listen in every existing topic"""
+        self.subscribe('#', self.process_external_world_update)
+
     def process_external_world_update(self, topic, payload, **kwargs):
+        """Update the world for every message received"""
         decoded_payload = str(payload.decode("utf-8", "ignore"))
         data = json.loads(decoded_payload)
         print(f'Received from topic {topic} data: {data}')
@@ -215,10 +261,14 @@ class MqttNetwork(Network):
             print(f'Error while processing message {data}: {err}')
 
     def update_the_world(self, update):
-        self.__publish_message(self.__create_message(update))
+        """Update the world with given effects"""
+        message = self.__create_message(update)
+        self.publish(self.__world_topic, message._asdict())
+        self.__the_world.update(self.__world_topic, message)
 
     @classmethod
     def __create_message(cls, effects):
+        """Create a formated message given only the effects"""
         message = Message(
             event_type='effects',
             event_tags=None,
@@ -236,32 +286,5 @@ class MqttNetwork(Network):
         return message
 
     def the_world(self):
+        """Return the world effects"""
         return self.__the_world.effects
-
-    @classmethod
-    def __on_connection_interrupted(cls, connection, error, **kwargs):
-        print("Connection interrupted. error: {}".format(error))
-
-    @classmethod
-    def __on_connection_resumed(cls, connection, return_code, session_present, **kwargs):
-        print("Connection resumed. return_code: {} session_present: {}".format(return_code, session_present))
-
-        if return_code == mqtt.ConnectReturnCode.ACCEPTED and not session_present:
-            print("Session did not persist. Resubscribing to existing topics...")
-            resubscribe_future, _ = connection.resubscribe_existing_topics()
-
-            # Cannot synchronously wait for resubscribe result because we're on the connection's event-loop thread,
-            # evaluate result with a callback instead.
-            resubscribe_future.add_done_callback(cls.__on_resubscribe_complete)
-
-    @classmethod
-    def __on_resubscribe_complete(cls, resubscribe_future):
-        resubscribe_results = resubscribe_future.result()
-        print("Resubscribe results: {}".format(resubscribe_results))
-        for topic, qos in resubscribe_results['topics']:
-            if qos is None:
-                sys.exit("Server rejected resubscribe to topic: {}".format(topic))
-
-    def __validate_connection(self):
-        if self.__mqtt_client is None:
-            raise ConnectionIsNotEstablished("Connection haven't been established, use connect method to do so")

@@ -13,7 +13,7 @@ from goap.planner import RegressivePlanner
 from goap.algo.astar import PathNotFoundException
 
 # used to create and access centralized infrastructure
-from infrastructure import LocalNetwork, MqttNetwork
+from infrastructure import LocalNetwork, AiMqttNetwork
 
 # used to make AI a singleton
 from highcliff.singleton import Singleton
@@ -52,10 +52,10 @@ class AI:
 
     def connect(self, endpoint="a15645u9kev0b1-ats.iot.eu-west-2.amazonaws.com",
                 port=8883, cert="/home/ubuntu/certs/certificate.pem.crt",
-                key="/home/ubuntu/certs/private.pem.key", subscription_topic='#'):
+                key="/home/ubuntu/certs/private.pem.key"):
         """Replace local network, which is default, with mqtt network, and connect to it"""
-        self.__network = MqttNetwork.instance()
-        self.__network.connect(endpoint, port, cert, key, subscription_topic)
+        self.__network = AiMqttNetwork.instance()
+        self.__network.connect(endpoint, port, cert, key)
 
     def set_goals(self, goals):
         self._goals = goals
