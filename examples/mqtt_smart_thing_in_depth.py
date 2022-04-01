@@ -1,5 +1,5 @@
 # needed to run a local version of the AI
-from highcliff.ai import AI
+from ai.ai import AI
 
 # the Highcliff actions to be tested
 from highcliff.exampleactions import MonitorBodyTemperature, AuthorizeRoomTemperatureChange, ChangeRoomTemperature
